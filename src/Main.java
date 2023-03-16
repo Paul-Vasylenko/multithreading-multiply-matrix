@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Main {
     public static Result multiplyMatrix(int[][] matrix1, int[][] matrix2) throws InterruptedException {
@@ -52,7 +53,7 @@ public class Main {
 
         for (int i = 0; i < numBlocks; i++) {
             final int row = i;
-            MatrixFoxThread thread = new MatrixFoxThread(cBlocks, blocks1, blocks2, row);
+            MatrixFoxThread thread = new MatrixFoxThread(cBlocks, blocks1, blocks2, row, blockSize);
 
             threads.add(thread);
             thread.start();
@@ -85,37 +86,51 @@ public class Main {
     }
 
     public static void convertTo2DArray(int[][][][] arr, int[][] result) {
-        int size = arr.length;
-        for (int i = 0; i < arr.length; i++) {
-            for (int j = 0; j < arr[i].length; j++) {
+        int subMatrixSize = arr[0][0].length;
+        int numSubMatrices = arr.length;
+        int numRows = numSubMatrices * subMatrixSize;
+        for (int i = 0; i < numSubMatrices; i++) {
+            for (int j = 0; j < numSubMatrices; j++) {
                 int[][] subMatrix = arr[i][j];
-                int subMatrixStartRow = i * size;
-                int subMatrixStartCol = j * size;
-                for (int k = 0; k < size; k++) {
-                    for (int l = 0; l < size; l++) {
+                int subMatrixStartRow = i * subMatrixSize;
+                int subMatrixStartCol = j * subMatrixSize;
+                for (int k = 0; k < subMatrixSize; k++) {
+                    for (int l = 0; l < subMatrixSize; l++) {
                         result[subMatrixStartRow + k][subMatrixStartCol + l] = subMatrix[k][l];
                     }
                 }
             }
         }
     }
+    public static int[][] generateMatrix(int rows, int cols) {
+        int[][] matrix = new int[rows][cols];
+        Random rand = new Random();
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                matrix[i][j] = rand.nextInt(5) + 1;
+            }
+        }
+        return matrix;
+    }
     public static void main(String[] args) {
-        int[][] matrix1 = {
-                {1,1,2,3},
-                {1,2,1,1},
-                {1,3,1,2},
-                {2,1,1,3},
-        };
-        int[][] matrix2 = {
-                {2,3,1,1},
-                {1,1,1,1},
-                {2,2,1,3},
-                {3,1,1,1},
-        };
+        int SIZE = 1000;
+        int[][] matrix1 = generateMatrix(SIZE,SIZE);
+        int[][] matrix2 = generateMatrix(SIZE,SIZE);
         try {
-//            Result result = multiplyMatrix(matrix1, matrix2);
-            Result result = multiplyMatrixFox(matrix1, matrix2, 2);
-            result.printResult();
+//            long startSimple = System.currentTimeMillis();
+//            multiplyMatrix(matrix1, matrix2);
+//            long endSimple = System.currentTimeMillis();
+
+            long startFox = System.currentTimeMillis();
+            Result res = multiplyMatrixFox(matrix1, matrix2, 200);
+//            res.printResult();
+            long endFox = System.currentTimeMillis();
+
+//            long elapsedSimple = endSimple - startSimple;
+            long elapsedFox = endFox - startFox;
+
+//            System.out.println("Simple algorithm took " + elapsedSimple + " ms");
+            System.out.println("Fox algorithm took " + elapsedFox + " ms");
         } catch(InterruptedException e) {
             e.printStackTrace();
         }

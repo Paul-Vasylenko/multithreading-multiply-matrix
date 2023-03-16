@@ -3,11 +3,13 @@ public class MatrixFoxThread extends Thread {
     int[][][][] matrix1;
     int[][][][] matrix2;
     int row;
-    public MatrixFoxThread(int[][][][] result, int[][][][] m1, int[][][][] m2, int row) {
+    int blockSize;
+    public MatrixFoxThread(int[][][][] result, int[][][][] m1, int[][][][] m2, int row, int blockSize) {
         this.result=result;
         matrix1=m1;
         matrix2=m2;
         this.row = row;
+        this.blockSize = blockSize;
     }
 
     @Override
@@ -16,7 +18,7 @@ public class MatrixFoxThread extends Thread {
         int cols2 = matrix2[0].length;
 
         for(int j = 0; j < cols2; j++) {
-            int[][] blockResult = new int[cols2][cols2];
+            int[][] blockResult = new int[blockSize][blockSize];
             for (int k = 0; k < cols1; k++) {
                 int[][] sub1 = matrix1[row][k];
                 int[][] sub2 = matrix2[k][j];
@@ -43,14 +45,12 @@ public class MatrixFoxThread extends Thread {
         }
         return result;
     }
+    public int[][] addMatrices(int[][] matrix1, int[][] matrix2) {
+        int numBlocks  = matrix1.length; // number of blocks in each row/column
+        int[][] result = new int[numBlocks][numBlocks];
 
-    public static int[][] addMatrices(int[][] matrix1, int[][] matrix2) {
-        int rows = matrix1.length;
-        int cols = matrix1[0].length;
-        int[][] result = new int[rows][cols];
-
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
+        for (int i = 0; i < numBlocks; i++) {
+            for (int j = 0; j < numBlocks; j++) {
                 result[i][j] = matrix1[i][j] + matrix2[i][j];
             }
         }
