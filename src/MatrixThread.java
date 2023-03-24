@@ -1,23 +1,21 @@
 public class MatrixThread extends Thread {
     int[][] result;
-    int[][] matrix1;
-    int[][] matrix2;
-    int row;
-    public MatrixThread(int[][] result, int[][] m1, int[][] m2, int row) {
+    int[] row;
+    int[] col;
+    int rowIndex;
+    int colIndex;
+    public MatrixThread(int[][] result, int[] row, int[] col, int rowIndex, int colIndex) {
         this.result=result;
-        matrix1=m1;
-        matrix2=m2;
         this.row = row;
+        this.col = col;
+        this.rowIndex = rowIndex;
+        this.colIndex = colIndex;
     }
     @Override
     public void run() {
-        int cols1 = matrix1[0].length;
-        int cols2 = matrix2[0].length;
-
-        for (int j = 0; j < cols2; j++) {
-            for (int k = 0; k < cols1; k++) {
-                result[row][j] += matrix1[row][k] * matrix2[k][j];
-            }
+        int matrixACols = row.length;
+        for (int k = 0; k < matrixACols; k++) {
+            result[rowIndex][colIndex] += row[k] * col[k];
         }
     }
 }

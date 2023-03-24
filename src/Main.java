@@ -12,12 +12,14 @@ public class Main {
             throw new IllegalArgumentException("The number of columns of the first matrix must match the number of rows of the second matrix.");
         }
         int[][] result = new int[rows1][columns2];
+        int[][] transposeMatrix2 = transpose(matrix2);
         List<MatrixThread> threads = new ArrayList<>();
         for (int i = 0; i < rows1; i++) {
-            final int row = i;
-            MatrixThread thread = new MatrixThread(result, matrix1, matrix2, row);
-            thread.start();
-            threads.add(thread);
+            for (int j = 0; j < columns2; j++) {
+                MatrixThread thread = new MatrixThread(result, matrix1[i], transposeMatrix2[j], i, j);
+                thread.start();
+                threads.add(thread);
+            }
         }
 
         for (MatrixThread thread : threads) {
@@ -85,6 +87,17 @@ public class Main {
         return blocks;
     }
 
+    private static int[][] transpose(int[][] matrix){
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+        int[][] result = new int[cols][rows];
+        for(int i = 0; i < rows; i++){
+            for(int j = 0; j < cols; j++){
+                result[j][i] = matrix[i][j];
+            }
+        }
+        return result;
+    }
     public static void convertTo2DArray(int[][][][] arr, int[][] result) {
         int subMatrixSize = arr[0][0].length;
         int numSubMatrices = arr.length;
@@ -113,24 +126,25 @@ public class Main {
         return matrix;
     }
     public static void main(String[] args) {
-        int SIZE = 1000;
+        int SIZE = 4;
         int[][] matrix1 = generateMatrix(SIZE,SIZE);
         int[][] matrix2 = generateMatrix(SIZE,SIZE);
         try {
 //            long startSimple = System.currentTimeMillis();
-//            multiplyMatrix(matrix1, matrix2);
+            Result res = multiplyMatrix(matrix1, matrix2);
+            res.printResult();
 //            long endSimple = System.currentTimeMillis();
 
-            long startFox = System.currentTimeMillis();
-            Result res = multiplyMatrixFox(matrix1, matrix2, 200);
+//            long startFox = System.currentTimeMillis();
+//            Result res = multiplyMatrixFox(matrix1, matrix2, 2);
 //            res.printResult();
-            long endFox = System.currentTimeMillis();
+//            long endFox = System.currentTimeMillis();
 
 //            long elapsedSimple = endSimple - startSimple;
-            long elapsedFox = endFox - startFox;
+//            long elapsedFox = endFox - startFox;
 
 //            System.out.println("Simple algorithm took " + elapsedSimple + " ms");
-            System.out.println("Fox algorithm took " + elapsedFox + " ms");
+//            System.out.println("Fox algorithm took " + elapsedFox + " ms");
         } catch(InterruptedException e) {
             e.printStackTrace();
         }
