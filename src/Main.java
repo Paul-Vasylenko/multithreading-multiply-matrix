@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Main {
     public static Result multiplyMatrix(int[][] matrix1, int[][] matrix2) throws InterruptedException {
@@ -13,18 +16,22 @@ public class Main {
         }
         int[][] result = new int[rows1][columns2];
         int[][] transposeMatrix2 = transpose(matrix2);
-        List<MatrixThread> threads = new ArrayList<>();
+        ExecutorService executor = Executors.newFixedThreadPool(rows1);
+        List<Callable<Object>> tasks = new ArrayList<>(rows1);
         for (int i = 0; i < rows1; i++) {
             for (int j = 0; j < columns2; j++) {
                 MatrixThread thread = new MatrixThread(result, matrix1[i], transposeMatrix2[j], i, j);
-                thread.start();
-                threads.add(thread);
+                tasks.add(Executors.callable(thread));
             }
         }
 
-        for (MatrixThread thread : threads) {
-                thread.join();
+        try {
+            executor.invokeAll(tasks);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
+
+        executor.shutdown();
 
         return new Result(result);
     }
@@ -126,25 +133,25 @@ public class Main {
         return matrix;
     }
     public static void main(String[] args) {
-        int SIZE = 4;
+        int SIZE = 1600;
         int[][] matrix1 = generateMatrix(SIZE,SIZE);
         int[][] matrix2 = generateMatrix(SIZE,SIZE);
         try {
-//            long startSimple = System.currentTimeMillis();
+            long startSimple = System.currentTimeMillis();
             Result res = multiplyMatrix(matrix1, matrix2);
-            res.printResult();
-//            long endSimple = System.currentTimeMillis();
-
-//            long startFox = System.currentTimeMillis();
-//            Result res = multiplyMatrixFox(matrix1, matrix2, 2);
 //            res.printResult();
-//            long endFox = System.currentTimeMillis();
+            long endSimple = System.currentTimeMillis();
 
-//            long elapsedSimple = endSimple - startSimple;
-//            long elapsedFox = endFox - startFox;
+            long startFox = System.currentTimeMillis();
+            /*Result res = */multiplyMatrixFox(matrix1, matrix2, 400);
+//            res.printResult();
+            long endFox = System.currentTimeMillis();
 
-//            System.out.println("Simple algorithm took " + elapsedSimple + " ms");
-//            System.out.println("Fox algorithm took " + elapsedFox + " ms");
+            long elapsedSimple = endSimple - startSimple;
+            long elapsedFox = endFox - startFox;
+
+            System.out.println("Simple algorithm took " + elapsedSimple + " ms");
+            System.out.println("Fox algorithm took " + elapsedFox + " ms");
         } catch(InterruptedException e) {
             e.printStackTrace();
         }
