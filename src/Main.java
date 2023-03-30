@@ -37,20 +37,15 @@ public class Main {
     }
 
     public static Result multiplyMatrixFox(int[][] matrix1, int[][] matrix2, int blockSize) throws InterruptedException {
-        int rows1 = matrix1.length;
-        int columns1 = matrix1[0].length;
-        int rows2 = matrix2.length;
-        int columns2 = matrix2[0].length;
-        if (columns1 != rows2) {
-            throw new IllegalArgumentException("The number of columns of the first matrix must match the number of rows of the second matrix");
-        }
-        if (rows1 % blockSize != 0 || columns1 % blockSize != 0 || rows2 % blockSize != 0 || columns2 % blockSize != 0) {
+        int rows = matrix1.length;
+        int columns = matrix1[0].length;
+        if (rows % blockSize != 0 || columns % blockSize != 0) {
             throw new IllegalArgumentException("The matrixes must be evenly divisible into blocks of size " + blockSize);
         }
-        int numBlocks  = rows1 / blockSize; // number of blocks in each row/column
-        int[][] result = new int[rows1][rows1]; // Result matrix C
-        for (int i = 0; i < rows1; i++) { // Fill result matrix with 0
-            for (int j = 0; j < rows1; j++) {
+        int numBlocks  = rows / blockSize; // number of blocks in each row/column
+        int[][] result = new int[rows][rows]; // Result matrix C
+        for (int i = 0; i < rows; i++) { // Fill result matrix with 0
+            for (int j = 0; j < rows; j++) {
                 result[i][j] = 0;
             }
         }
@@ -61,11 +56,17 @@ public class Main {
         List<MatrixFoxThread> threads = new ArrayList<>();
 
         for (int i = 0; i < numBlocks; i++) {
-            final int row = i;
-            MatrixFoxThread thread = new MatrixFoxThread(cBlocks, blocks1, blocks2, row, blockSize);
+            for (int j = 0; j < numBlocks; j++) {
+                for (int k = 0; k < numBlocks; k++) {
+                    final int row = i;
+                    final int col = j;
+                    final int mod = (i+k)%numBlocks;
+                    MatrixFoxThread thread = new MatrixFoxThread(cBlocks, blocks1[i][mod], blocks2[mod][j], row, col, blockSize);
 
-            threads.add(thread);
-            thread.start();
+                    threads.add(thread);
+                    thread.start();
+                }
+            }
         }
 
         for (MatrixFoxThread thread : threads) {
@@ -133,18 +134,16 @@ public class Main {
         return matrix;
     }
     public static void main(String[] args) {
-        int SIZE = 1600;
+        int SIZE = 100;
         int[][] matrix1 = generateMatrix(SIZE,SIZE);
         int[][] matrix2 = generateMatrix(SIZE,SIZE);
         try {
             long startSimple = System.currentTimeMillis();
             Result res = multiplyMatrix(matrix1, matrix2);
-//            res.printResult();
             long endSimple = System.currentTimeMillis();
 
             long startFox = System.currentTimeMillis();
-            /*Result res = */multiplyMatrixFox(matrix1, matrix2, 400);
-//            res.printResult();
+            /*Result res =*/ multiplyMatrixFox(matrix1, matrix2, 25);
             long endFox = System.currentTimeMillis();
 
             long elapsedSimple = endSimple - startSimple;

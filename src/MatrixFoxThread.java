@@ -1,33 +1,23 @@
 public class MatrixFoxThread extends Thread {
     int[][][][] result;
-    int[][][][] matrix1;
-    int[][][][] matrix2;
+    int[][] matrix1;
+    int[][] matrix2;
     int row;
+    int col;
     int blockSize;
-    public MatrixFoxThread(int[][][][] result, int[][][][] m1, int[][][][] m2, int row, int blockSize) {
+    public MatrixFoxThread(int[][][][] result, int[][] m1, int[][] m2, int row, int col, int blockSize) {
         this.result=result;
         matrix1=m1;
         matrix2=m2;
         this.row = row;
+        this.col = col;
         this.blockSize = blockSize;
     }
 
     @Override
     public void run() {
-        int cols1 = matrix1[0].length;
-        int cols2 = matrix2[0].length;
-
-        for(int j = 0; j < cols2; j++) {
-            int[][] blockResult = new int[blockSize][blockSize];
-            for (int k = 0; k < cols1; k++) {
-                int[][] sub1 = matrix1[row][k];
-                int[][] sub2 = matrix2[k][j];
-
-                int[][] subResult = multiplyMatrices(sub1, sub2);
-                blockResult = addMatrices(blockResult, subResult);
-            }
-            result[row][j] = blockResult;
-        }
+        int[][] subResult = multiplyMatrices(matrix1, matrix2);
+        result[row][col] = addMatrices(result[row][col], subResult); // [ [0,0] [0,0] ] => [ [0,1] [0,0] ]; => [ [0,0] [0,1] ]
     }
 
     public int[][] multiplyMatrices(int[][] firstMatrix, int[][] secondMatrix) {
